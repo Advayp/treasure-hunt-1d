@@ -1,6 +1,6 @@
-# Mesocosm environment (author repo)
+# Treasure Hunt (1D) — Mesocosm environment
 
-This repo was scaffolded with `mesocosm init` for SWECCathon Mesocosm.
+Toy Mesocosm environment for SWECCathon: a 1D “treasure hunt” game where the agent replies `left`/`right`/`stay`.
 
 ## Setup
 
@@ -35,9 +35,8 @@ ollama pull llama3.2
 ## Next steps
 
 - Edit `env.py` (your environment logic).
-- Edit `benchanything.json` (manifest / domain config).
+- Edit `benchanything.json` (manifest / domain config). Domain id is `treasure-hunt-1d`.
 - Validate your manifest locally:
   - `./.venv/bin/mesocosm validate benchanything.json`
 - When ready to submit, push this repo to GitHub and run:
   - `./.venv/bin/mesocosm env submit --name "…" --github-url https://github.com/...`
-
