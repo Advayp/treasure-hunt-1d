@@ -1,4 +1,4 @@
-"""Toy benchmark env: a 1D treasure hunt game."""
+"""Toy benchmark env: 1D treasure hunt with sparse observations."""
 
 from __future__ import annotations
 
@@ -21,22 +21,25 @@ class MyEnv(BaseEnv):
         self._rng.seed(seed)
         self._steps = 0
 
-        self._world_size = int(params.get("world_size", 5))
-        self._max_steps = int(params.get("max_steps", 6))
+        self._world_size = int(params.get("world_size", 9))
+        self._max_steps = int(params.get("max_steps", 5))
 
         if self._world_size < 2:
             raise ValueError("world_size must be >= 2")
         if self._max_steps < 1:
             raise ValueError("max_steps must be >= 1")
 
-        self._pos = 0
+        self._pos = self._rng.randrange(0, self._world_size)
         self._goal = self._rng.randrange(0, self._world_size)
+        if self._world_size > 1:
+            while self._goal == self._pos:
+                self._goal = self._rng.randrange(0, self._world_size)
 
         return {
             "world_size": self._world_size,
-            "position": self._pos,
-            "hint": self._hint(),
-            "instructions": "Reply with one of: left, right, stay.",
+            "distance": abs(self._goal - self._pos),
+            "steps_left": self._max_steps - self._steps,
+            "instructions": "Reply with one of: left, right, stay. Observation only includes distance-to-goal.",
         }
 
     def step(self, action: Any) -> StepResult:
@@ -52,8 +55,9 @@ class MyEnv(BaseEnv):
         else:
             return StepResult(
                 observation={
-                    "position": self._pos,
-                    "hint": self._hint(),
+                    "world_size": self._world_size,
+                    "distance": abs(self._goal - self._pos),
+                    "steps_left": max(0, self._max_steps - self._steps),
                     "error": "Invalid action. Use: left, right, stay.",
                 },
                 reward=0.0,
@@ -68,16 +72,13 @@ class MyEnv(BaseEnv):
         timed_out = self._steps >= self._max_steps and not found
 
         return StepResult(
-            observation={"position": self._pos, "hint": self._hint()},
+            observation={
+                "world_size": self._world_size,
+                "distance": abs(self._goal - self._pos),
+                "steps_left": max(0, self._max_steps - self._steps),
+            },
             reward=1.0 if found else 0.0,
             terminated=found,
             truncated=timed_out,
             info={"steps": self._steps, "max_steps": self._max_steps},
         )
-
-    def _hint(self) -> str:
-        if self._pos < self._goal:
-            return "treasure is to the right"
-        if self._pos > self._goal:
-            return "treasure is to the left"
-        return "you found the treasure"

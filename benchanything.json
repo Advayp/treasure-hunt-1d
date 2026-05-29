@@ -2,16 +2,16 @@
   "id": "treasure-hunt-1d",
   "adapter": "adapter.py",
   "name": "Treasure Hunt (1D)",
-  "description": "A tiny game: find the hidden treasure by replying left/right/stay using a directional hint.",
+  "description": "A tiny game: find the hidden treasure by replying left/right/stay using only the observed distance-to-goal.",
 
   "binding_vow": {
     "version": "1.0.0",
     "tier": "tier1",
-    "description": "You are in a 1D world. Each step you receive your position and a hint about where the treasure is. Reply with left/right/stay to move. Get reward 1.0 when you land on the treasure before max steps; otherwise 0.0.",
+    "description": "You are in a 1D world. Each step you receive world_size, steps_left, and distance to the treasure (no direction and no absolute position). Reply with left/right/stay to move. Reward is 1.0 if you land on the treasure before max steps, otherwise 0.0.",
 
     "observation_space": {
       "type": "json",
-      "description": "{ \"world_size\": int, \"position\": int, \"hint\": string, \"instructions\"?: string, \"error\"?: string }"
+      "description": "{ \"world_size\": int, \"distance\": int, \"steps_left\": int, \"instructions\"?: string, \"error\"?: string }"
     },
 
     "action_space": {
@@ -26,7 +26,7 @@
     },
 
     "episode": {
-      "max_steps": 6,
+      "max_steps": 5,
       "deterministic_reset": true,
       "supports_seed": true,
       "parallel_episodes": 1,
