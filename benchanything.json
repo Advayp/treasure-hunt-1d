@@ -2,21 +2,21 @@
   "id": "treasure-hunt-1d",
   "adapter": "adapter.py",
   "name": "Treasure Hunt (1D)",
-  "description": "A tiny game: find the hidden treasure by replying left/right/stay using only the observed distance-to-goal.",
+  "description": "A tiny game: find the hidden treasure by replying left/right/stay using distance-to-goal plus the change since your last action.",
 
   "binding_vow": {
     "version": "1.0.0",
     "tier": "tier1",
-    "description": "You are in a 1D world. Each step you receive world_size, steps_left, and distance to the treasure (no direction and no absolute position). Reply with left/right/stay to move. Reward is 1.0 if you land on the treasure before max steps, otherwise 0.0.",
+    "description": "You are in a 1D world. Each step you receive world_size, steps_left, distance to the treasure, and distance_delta (previous_distance - new_distance). Use distance_delta to infer which direction helps. Reply with EXACTLY ONE token: left OR right OR stay. Reward is 1.0 if you land on the treasure before max steps, otherwise 0.0.",
 
     "observation_space": {
       "type": "json",
-      "description": "{ \"world_size\": int, \"distance\": int, \"steps_left\": int, \"instructions\"?: string, \"error\"?: string }"
+      "description": "{ \"world_size\": int, \"distance\": int, \"distance_delta\": int, \"steps_left\": int, \"instructions\"?: string, \"error\"?: string }"
     },
 
     "action_space": {
       "type": "text",
-      "description": "One of: left | right | stay"
+      "description": "EXACTLY one token: left | right | stay"
     },
 
     "reward": {

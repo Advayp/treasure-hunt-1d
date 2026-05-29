@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import re
 from typing import Any
 
 from bench_common.env_sdk.base import BaseEnv, StepResult
@@ -38,14 +39,17 @@ class MyEnv(BaseEnv):
         return {
             "world_size": self._world_size,
             "distance": abs(self._goal - self._pos),
+            "distance_delta": 0,
             "steps_left": self._max_steps - self._steps,
-            "instructions": "Reply with one of: left, right, stay. Observation only includes distance-to-goal.",
+            "instructions": "Reply with EXACTLY one token: left OR right OR stay. No punctuation, no extra text.",
         }
 
     def step(self, action: Any) -> StepResult:
         self._steps += 1
 
-        move = str(action).strip().lower()
+        prev_distance = abs(self._goal - self._pos)
+
+        move = self._parse_action(action)
         if move == "left":
             self._pos -= 1
         elif move == "right":
@@ -56,7 +60,8 @@ class MyEnv(BaseEnv):
             return StepResult(
                 observation={
                     "world_size": self._world_size,
-                    "distance": abs(self._goal - self._pos),
+                    "distance": prev_distance,
+                    "distance_delta": None,
                     "steps_left": max(0, self._max_steps - self._steps),
                     "error": "Invalid action. Use: left, right, stay.",
                 },
@@ -67,6 +72,8 @@ class MyEnv(BaseEnv):
             )
 
         self._pos = max(0, min(self._pos, self._world_size - 1))
+        current_distance = abs(self._goal - self._pos)
+        distance_delta = prev_distance - current_distance
 
         found = self._pos == self._goal
         timed_out = self._steps >= self._max_steps and not found
@@ -74,7 +81,8 @@ class MyEnv(BaseEnv):
         return StepResult(
             observation={
                 "world_size": self._world_size,
-                "distance": abs(self._goal - self._pos),
+                "distance": current_distance,
+                "distance_delta": distance_delta,
                 "steps_left": max(0, self._max_steps - self._steps),
             },
             reward=1.0 if found else 0.0,
@@ -82,3 +90,9 @@ class MyEnv(BaseEnv):
             truncated=timed_out,
             info={"steps": self._steps, "max_steps": self._max_steps},
         )
+
+    @staticmethod
+    def _parse_action(action: Any) -> str:
+        text = str(action).strip().lower()
+        matches = re.findall(r"\b(left|right|stay)\b", text)
+        return matches[-1] if matches else text
