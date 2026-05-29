@@ -1,0 +1,50 @@
+{
+  "id": "treasure-hunt-1d",
+  "adapter": "adapter.py",
+  "name": "Treasure Hunt (1D)",
+  "description": "A tiny game: find the hidden treasure by replying left/right/stay using a directional hint.",
+
+  "binding_vow": {
+    "version": "1.0.0",
+    "tier": "tier1",
+    "description": "You are in a 1D world. Each step you receive your position and a hint about where the treasure is. Reply with left/right/stay to move. Get reward 1.0 when you land on the treasure before max steps; otherwise 0.0.",
+
+    "observation_space": {
+      "type": "json",
+      "description": "{ \"world_size\": int, \"position\": int, \"hint\": string, \"instructions\"?: string, \"error\"?: string }"
+    },
+
+    "action_space": {
+      "type": "text",
+      "description": "One of: left | right | stay"
+    },
+
+    "reward": {
+      "type": "binary",
+      "range": { "low": 0.0, "high": 1.0 },
+      "description": "1.0 if you find the treasure, else 0.0"
+    },
+
+    "episode": {
+      "max_steps": 6,
+      "deterministic_reset": true,
+      "supports_seed": true,
+      "parallel_episodes": 1,
+      "observability": "full"
+    },
+
+    "techniques": []
+  },
+
+  "scoring": {
+    "primary_metric": "accuracy",
+    "higher_is_better": true,
+    "metrics": [
+      {
+        "name": "accuracy",
+        "type": "episode_reward",
+        "aggregation": "pass_rate"
+      }
+    ]
+  }
+}
